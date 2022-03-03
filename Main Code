@@ -1,0 +1,64 @@
+# Alex Eldaief
+# Project 4: Data Clocks/Physical Dashboards
+# The goal of this project is to take input from a stock chart API and display the change in price of a given stock
+
+# Imports
+from buildhat import Motor
+import requests
+import json
+import time 
+motor = Motor('A')
+
+
+# Opening statement
+print(' ')
+print('Welcome to your robotic stock clock: An up-to-date stock price change indicator!')
+
+# Connecting to API for previous trading day and current day
+API = requests.get('https://api.polygon.io/v1/open-close/AAPL/2022-02-23?adjusted=true&apiKey=I_UXsKs6RkHtgp1EEUVSEeJjJTpGxRB6')
+#print(API.status_code)
+data = API.text
+data_text = json.loads(data)
+#print(data_text)
+open = data_text['open']
+close = data_text['close']
+print(open)
+print(close)
+
+# Calculate the percentage change for the given stock on a particular day
+change = close - open
+per_change = (change/open)*100
+format_per_change = "{:.1f}".format(per_change)
+final_val = float(format_per_change)
+print(final_val,'%')
+
+# Conditional statements for price change to move the motor to specified region on clock
+if (final_val < 1.0 and final_val >= 0.1):
+    motor.run_for_degrees(30)
+    time.sleep(3)
+    motor.run_for_degrees(-30)
+
+elif final_val > 5.0:
+    motor.run_for_degrees(150)
+    time.sleep(3)
+    motor.run_for_degrees(-150)
+
+elif (final_val > 1.0 and final_val < 5.0):
+    motor.run_for_degrees(90)
+    time.sleep(3)
+    motor.run_for_degrees(-90)
+
+elif (final_val < 0.0 and final_val > -1.0):
+    motor.run_for_degrees(-30)
+    time.sleep(3)
+    motor.run_for_degrees(30)
+    
+elif (final_val < -1.0 and final_val > -5.0):
+    motor.run_for_degrees(-90)
+    time.sleep(3)
+    motor.run_for_degrees(90)
+
+elif (final_val < -5.0):
+    motor.run_for_degrees(-150)
+    time.sleep(3)
+    motor.run_for_degrees(150)
